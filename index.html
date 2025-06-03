@@ -496,16 +496,16 @@
       const massValue = parseFloat(massInput.value);
       const predictionValue = parseFloat(predictedLandingInput.value);
 
-      if(isNaN(velocityValue) || velocityValue <= 0){
-        alert('Por favor, insira uma velocidade inicial válida (maior que 0).');
+      if(isNaN(velocityValue) || velocityValue <= 0 || velocityValue >= 100){
+        alert('Por favor, insira uma velocidade inicial válida (maior que 0 e menor que 100).');
         return;
       }
-      if(isNaN(angleValue) || angleValue <= 0 || angleValue >= 90){
-        alert('Por favor, insira um ângulo válido entre 1° e 89°.');
+      if(isNaN(angleValue) || angleValue <= 0 || angleValue >= 91){
+        alert('Por favor, insira um ângulo válido entre 1° e 90°.');
         return;
       }
-      if(isNaN(massValue) || massValue <= 0){
-        alert('Por favor, insira uma massa válida (maior que 0).');
+      if(isNaN(massValue) || massValue <= 0 || massValue >= 501){
+        alert('Por favor, insira uma massa válida (entre 1 e 500).');
         return;
       }
       if(isNaN(predictionValue)){
