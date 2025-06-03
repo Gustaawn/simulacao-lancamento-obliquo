@@ -51,7 +51,7 @@ git clone httpsgithub.comgustaawnsimulacao-lancamento-obliquo.git
 cd nome-do-repositorio
 ```
 
-3. Abra o arquivo `simulacao-lancamento-obliquo.html` em qualquer navegador moderno.
+3. Abra o arquivo `index.html` em qualquer navegador moderno.
 
 ---
 
