@@ -48,7 +48,7 @@ git clone httpsgithub.comgustaawnsimulacao-lancamento-obliquo.git
 2. Navegue até a pasta do projeto
 
 ```bash
-cd nome-do-repositorio
+cd simulacao-lancamento-obliquo
 ```
 
 3. Abra o arquivo `index.html` em qualquer navegador moderno.
