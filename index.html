@@ -9,16 +9,16 @@
 
   :root {
     --background-color: #0d1b2a;
-    --ground-color: #1b263b;
+    --ground-color: #000000;
     --grid-color: #415a77;
     --text-color: #a8dadc;
     --accent-color: #f1faee;
     --button-bg: #457b9d;
     --button-hover-bg: #1d3557;
 
-    --ball-color: #e63946;
-    --stone-color: #6d6875;
-    --arrow-color: #f4a261;
+    --ball-color: #e63946; /* Cor do objeto: Bola */
+    --stone-color: #6d6875; /* Cor do objeto: Pedra */
+    --arrow-color: #f4a261; /* Cor do objeto: Flecha */
   }
 
   body {
@@ -36,7 +36,7 @@
   h1 {
     margin-bottom: 10px;
     color: var(--accent-color);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 2.5rem;
     user-select: none;
   }
@@ -159,23 +159,18 @@
         <option value="stone">Pedra</option>
         <option value="arrow">Flecha</option>
       </select>
-      <span id="desc-objectSelect" class="sr-only">Selecione o objeto para lançar</span>
     </label>
     <label for="massInput">Massa (kg)
-      <input type="number" id="massInput" min="0.1" max="50" value="1" step="0.1" aria-describedby="desc-massInput"/>
-      <span id="desc-massInput" class="sr-only">Massa do objeto em quilogramas</span>
+      <input type="number" id="massInput" min="0.1" max="50" value="1" step="0.1"/>
     </label>
     <label for="velocity">Velocidade Inicial (m/s)
-      <input type="number" id="velocity" min="1" max="100" value="30" step="0.1" aria-describedby="desc-velocity"/>
-      <span id="desc-velocity" class="sr-only">Velocidade inicial em metros por segundo</span>
+      <input type="number" id="velocity" min="1" max="100" value="30" step="0.1" />
     </label>
     <label for="angle">Ângulo de lançamento (°)
-      <input type="number" id="angle" min="1" max="89" value="45" step="0.1" aria-describedby="desc-angle"/>
-      <span id="desc-angle" class="sr-only">Ângulo de lançamento em graus</span>
+      <input type="number" id="angle" min="1" max="89" value="45" step="0.1"/>
     </label>
     <label for="predictedLanding">Previsão de distância (m)
-      <input type="number" id="predictedLanding" min="0" step="0.1" aria-describedby="desc-predictedLanding" placeholder="Ex: 50"/>
-      <span id="desc-predictedLanding" class="sr-only">Previsão da distância de aterrissagem em metros</span>
+      <input type="number" id="predictedLanding" min="0" step="0.1" placeholder="Ex: 50"/>
     </label>
     <button id="launchBtn" aria-live="polite" aria-atomic="true">Lançar</button>
     <button id="resetBtn" disabled>Resetar</button>
@@ -296,7 +291,7 @@
       ctx.strokeStyle = 'rgba(65, 90, 119, 0.6)';
       ctx.lineWidth = 1;
       ctx.font = '13px Inter, sans-serif';
-      ctx.fillStyle = '#a8dadc';
+      ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'left';
 
       // Linhas horizontais da distancia
