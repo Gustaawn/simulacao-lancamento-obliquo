@@ -6,6 +6,10 @@ Este projeto web permite simular o lançamento obíquo de objetos utilizando con
 
 ## 🚀 Demonstração
 
+Acesse a simulação online clicando no link abaixo:
+
+👉 [Abrir Demonstração](https://gustaawn.github.io/simulacao-lancamento-obliquo/)
+
 ---
 
 ## 📅 Funcionalidades
