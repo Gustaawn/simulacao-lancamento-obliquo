@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Simulação de Lançamento Oblíquo - Jogo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap');
+
+  :root {
+    --background-color: #0d1b2a;
+    --ground-color: #1b263b;
+    --grid-color: #415a77;
+    --text-color: #a8dadc;
+    --accent-color: #f1faee;
+    --button-bg: #457b9d;
+    --button-hover-bg: #1d3557;
+
+    --ball-color: #e63946;
+    --stone-color: #6d6875;
+    --arrow-color: #f4a261;
+  }
+
+  body {
+    margin: 0;
+    background: var(--background-color);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+    color: var(--accent-color);
+    font-weight: 700;
+    font-size: 2.5rem;
+    user-select: none;
+  }
+
+  #controls {
+    margin: 15px 0 25px 0;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 780px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--accent-color);
+    min-width: 130px;
+  }
+
+  input[type=number], select {
+    margin-top: 5px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: none;
+    width: 130px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    background-color: #1b263b;
+    color: var(--accent-color);
+    appearance: none;
+  }
+
+  select {
+    cursor: pointer;
+  }
+
+  button {
+    padding: 10px 25px;
+    background-color: var(--button-bg);
+    color: var(--accent-color);
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+    font-size: 1.1rem;
+  }
+
+  button:disabled {
+    background-color: #334a61;
+    cursor: default;
+  }
+
+  button:hover:not(:disabled) {
+    background-color: var(--button-hover-bg);
+  }
+
+  canvas {
+    border: 2px solid var(--grid-color);
+    border-radius: 12px;
+    background: linear-gradient(to top, var(--ground-color) 10%, var(--background-color) 10%);
+  }
+
+  #info {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    max-width: 780px;
+    justify-content: center;
+  }
+
+  #info span {
+    min-width: 140px;
+  }
+
+  #message {
+    margin-top: 15px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    min-height: 28px;
+    text-align: center;
+    max-width: 780px;
+    user-select: none;
+  }
+
+  /* Responsive */
+  @media(max-width: 480px) {
+    #controls {
+      gap: 10px;
+    }
+    input[type=number], select {
+      width: 100px;
+      min-width: auto;
+    }
+    button {
+      font-size: 1rem;
+      padding: 8px 20px;
+    }
+    #info span {
+      min-width: 120px;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>Simulação de Lançamento Oblíquo - Simulação por Gustavo Munhoz</h1>
+  <div id="controls" role="form" aria-label="Controles do lançamento">
+    <label for="objectSelect">Objeto
+      <select id="objectSelect" aria-describedby="desc-objectSelect">
+        <option value="ball" selected>Bola</option>
+        <option value="stone">Pedra</option>
+        <option value="arrow">Flecha</option>
+      </select>
+      <span id="desc-objectSelect" class="sr-only">Selecione o objeto para lançar</span>
+    </label>
+    <label for="massInput">Massa (kg)
+      <input type="number" id="massInput" min="0.1" max="50" value="1" step="0.1" aria-describedby="desc-massInput"/>
+      <span id="desc-massInput" class="sr-only">Massa do objeto em quilogramas</span>
+    </label>
+    <label for="velocity">Velocidade Inicial (m/s)
+      <input type="number" id="velocity" min="1" max="100" value="30" step="0.1" aria-describedby="desc-velocity"/>
+      <span id="desc-velocity" class="sr-only">Velocidade inicial em metros por segundo</span>
+    </label>
+    <label for="angle">Ângulo de lançamento (°)
+      <input type="number" id="angle" min="1" max="89" value="45" step="0.1" aria-describedby="desc-angle"/>
+      <span id="desc-angle" class="sr-only">Ângulo de lançamento em graus</span>
+    </label>
+    <label for="predictedLanding">Previsão de distância (m)
+      <input type="number" id="predictedLanding" min="0" step="0.1" aria-describedby="desc-predictedLanding" placeholder="Ex: 50"/>
+      <span id="desc-predictedLanding" class="sr-only">Previsão da distância de aterrissagem em metros</span>
+    </label>
+    <button id="launchBtn" aria-live="polite" aria-atomic="true">Lançar</button>
+    <button id="resetBtn" disabled>Resetar</button>
+  </div>
+
+  <canvas id="canvas" width="700" height="400" aria-label="Simulação do lançamento oblíquo"></canvas>
+  <div id="info" aria-live="polite">
+    <span>Tempo: <strong id="time">0.00</strong> s</span>
+    <span>Velocidade Atual: <strong id="velocityCurrent">0.00</strong> m/s</span>
+    <span>Alcance horizontal: <strong id="dist">0.00</strong> m</span>
+    <span>Altura máxima: <strong id="maxHeight">0.00</strong> m</span>
+  </div>
+  <div id="message" role="alert" aria-live="assertive"></div>
+
+<script>
+  (() => {
+    // Canvas e ctx
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // UI Elementos
+    const launchBtn = document.getElementById('launchBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const velocityInput = document.getElementById('velocity');
+    const angleInput = document.getElementById('angle');
+    const massInput = document.getElementById('massInput');
+    const objectSelect = document.getElementById('objectSelect');
+    const predictedLandingInput = document.getElementById('predictedLanding');
+
+    const timeDisplay = document.getElementById('time');
+    const velocityCurrentDisplay = document.getElementById('velocityCurrent');
+    const distDisplay = document.getElementById('dist');
+    const maxHeightDisplay = document.getElementById('maxHeight');
+
+    const messageDisplay = document.getElementById('message');
+
+    // Constantes
+    const g = 9.81; // gravidade m/s²
+    const scale = 6; // pixels por metro
+    const groundHeight = canvas.height * 0.1;
+    const trajectoryMaxPoints = 5000;
+
+    // Presets objetos
+    const objects = {
+      ball: {
+        name: 'Bola',
+        mass: 1,
+        color: 'rgba(230, 57, 70, 0.9)',
+        shape: 'circle',
+        size: 12
+      },
+      stone: {
+        name: 'Pedra',
+        mass: 5,
+        color: 'rgba(109, 104, 117, 0.9)',
+        shape: 'circle',
+        size: 16
+      },
+      arrow: {
+        name: 'Flecha',
+        mass: 0.3,
+        color: 'rgba(244, 162, 97, 0.9)',
+        shape: 'triangle',
+        size: 16
+      }
+    };
+
+    // Variaveis estado
+    let t = 0;
+    let v0 = 0;
+    let angle = 0;
+    let vx = 0;
+    let vy = 0;
+    let x = 0;
+    let y = 0;
+    let maxHeight = 0;
+    let flightTime = 0;
+    let maxRange = 0;
+    let launched = false;
+    let maxHeightReached = false;
+    let animationFrameId = null;
+    let trajectoryPoints = [];
+
+    let currentObject = objects.ball;
+
+    // Desabilitar entrada de massa para o objeto atual se flecha
+    function updateMassInputFromObject() {
+      massInput.value = currentObject.mass;
+      massInput.disabled = (currentObject.name === 'Flecha');
+    }
+
+    objectSelect.addEventListener('change', () => {
+      const objKey = objectSelect.value;
+      currentObject = objects[objKey];
+      updateMassInputFromObject();
+      messageDisplay.textContent = '';
+      resetSimulation();
+    });
+
+    massInput.addEventListener('input', () => {
+      let val = parseFloat(massInput.value);
+      if (isNaN(val) || val <= 0) {
+        massInput.value = currentObject.mass;
+      } else {
+        currentObject.mass = val;
+      }
+    });
+
+    // Gráfico do solo
+    function drawGrid() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Solo
+      ctx.fillStyle = 'var(--ground-color)';
+      ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+
+      // Linhas horizontais e verticais no gráfico a cada 50 px
+      ctx.strokeStyle = 'rgba(65, 90, 119, 0.6)';
+      ctx.lineWidth = 1;
+      ctx.font = '13px Inter, sans-serif';
+      ctx.fillStyle = '#a8dadc';
+      ctx.textAlign = 'left';
+
+      // Linhas horizontais da distancia
+      for(let i=0; i <= canvas.height - groundHeight; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - groundHeight - i);
+        ctx.lineTo(canvas.width, canvas.height - groundHeight - i);
+        ctx.stroke();
+        if(i > 0) {
+          ctx.fillText((i/scale).toFixed(1) + ' m', 5, canvas.height - groundHeight - i - 5);
+        }
+      }
+
+      // Linhas verticais da distancia
+      ctx.textAlign = 'center';
+      for(let j=0; j <= canvas.width; j += 50) {
+        ctx.beginPath();
+        ctx.moveTo(j, canvas.height - groundHeight);
+        ctx.lineTo(j, canvas.height - groundHeight - (canvas.height - groundHeight));
+        ctx.stroke();
+        if(j > 0){
+          ctx.fillText((j/scale).toFixed(1) + ' m', j, canvas.height - groundHeight + 15);
+        }
+      }
+    }
+
+    // Criar shape do objeto projetil
+    function drawProjectileAt(xPx, yPx) {
+      ctx.save();
+      switch(currentObject.shape) {
+        case 'circle':
+          ctx.beginPath();
+          ctx.fillStyle = currentObject.color;
+          ctx.shadowColor = currentObject.color;
+          ctx.shadowBlur = 15;
+          ctx.arc(xPx, yPx, currentObject.size, 0, 2 * Math.PI);
+          ctx.fill();
+          break;
+        case 'triangle':
+          ctx.fillStyle = currentObject.color;
+          ctx.shadowColor = currentObject.color;
+          ctx.shadowBlur = 15;
+          ctx.translate(xPx, yPx);
+          ctx.rotate(-Math.atan2(vy, vx));
+          ctx.beginPath();
+          ctx.moveTo(currentObject.size, 0);
+          ctx.lineTo(-currentObject.size/2, currentObject.size/2);
+          ctx.lineTo(-currentObject.size/2, -currentObject.size/2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.resetTransform();
+          break;
+        default:
+          ctx.beginPath();
+          ctx.fillStyle = currentObject.color;
+          ctx.arc(xPx, yPx, currentObject.size, 0, 2 * Math.PI);
+          ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Desenhar a linha de trajetória conforme o objeto anda
+    function drawTrajectoryLine() {
+      if(trajectoryPoints.length < 2) return;
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(244, 162, 97, 0.8)';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = 'rgba(244, 162, 97, 0.7)';
+      ctx.shadowBlur = 7;
+      ctx.moveTo(trajectoryPoints[0].x, trajectoryPoints[0].y);
+      for(let i=1; i<trajectoryPoints.length; i++) {
+        ctx.lineTo(trajectoryPoints[i].x, trajectoryPoints[i].y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    // Update fisica por frame
+    function updatePhysics(deltaT) {
+      t += deltaT;
+      x = vx * t;
+      y = vy * t - 0.5 * g * t * t;
+      let vyCurrent = vy - g * t;
+      if(y > maxHeight) maxHeight = y;
+
+      const xPx = x * scale;
+      const yPx = canvas.height - groundHeight - (y * scale);
+
+      if(yPx <= canvas.height - groundHeight + 20 && xPx >= 0 && xPx <= canvas.width) {
+        if(trajectoryPoints.length < trajectoryMaxPoints) {
+          trajectoryPoints.push({x: xPx, y: yPx});
+        }
+      }
+
+      return {xPx, yPx, yPos: y, vyCurrent};
+    }
+
+    // detectar momento maxHeight 
+    function checkMaxHeightReached(vyCurrent) {
+      if(!maxHeightReached && vyCurrent <= 0) {
+        maxHeightReached = true;
+        maxHeightDisplay.parentElement.style.opacity = 1;
+      }
+    }
+
+    // Loop de animaçao
+    function animate() {
+      if (!launched) return;
+
+      drawGrid();
+      drawTrajectoryLine();
+
+      let deltaT = 0.016;
+
+      let {xPx, yPx, yPos, vyCurrent} = updatePhysics(deltaT);
+
+      let vCurrentMagnitude = Math.sqrt(vx*vx + vyCurrent*vyCurrent);
+
+      timeDisplay.textContent = t.toFixed(2);
+      velocityCurrentDisplay.textContent = vCurrentMagnitude.toFixed(2);
+      distDisplay.textContent = x.toFixed(2);
+
+      if(!maxHeightReached) {
+        maxHeightDisplay.parentElement.style.opacity = 0.4;
+        maxHeightDisplay.textContent = '0.00';
+      } else {
+        maxHeightDisplay.textContent = maxHeight.toFixed(2);
+      }
+
+      checkMaxHeightReached(vyCurrent);
+
+      drawProjectileAt(xPx, yPx);
+
+      if (yPos < 0) {
+        launched = false;
+        t = flightTime;
+        timeDisplay.textContent = flightTime.toFixed(2);
+        distDisplay.textContent = maxRange.toFixed(2);
+        maxHeightDisplay.textContent = maxHeight.toFixed(2);
+        velocityCurrentDisplay.textContent = '0.00';
+        resetBtn.disabled = false;
+        launchBtn.disabled = false;
+        evaluateHit();
+        return;
+      }
+
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    // Validar se a distancia predictada é dentre 10m da distancia de aterrisagem do objeto
+    function evaluateHit() {
+      const predictionValue = parseFloat(predictedLandingInput.value);
+      if(isNaN(predictionValue)) {
+        messageDisplay.textContent = 'Insira uma previsão válida de distância para avaliar o resultado.';
+        return;
+      }
+      const diff = Math.abs(predictionValue - maxRange);
+      if(diff <= 10){
+        messageDisplay.textContent = `Parabéns! Você acertou a distância de aterrissagem em ${maxRange.toFixed(2)} m! (Diferença: ${diff.toFixed(2)} m) 🎯`;
+      } else {
+        messageDisplay.textContent = `Você errou! A distância real foi ${maxRange.toFixed(2)} m, sua previsão foi ${predictionValue.toFixed(2)} m. Tente novamente!`;
+      }
+    }
+
+    // Resetar simulacao
+    function resetSimulation() {
+      if(animationFrameId) cancelAnimationFrame(animationFrameId);
+
+      t = 0;
+      v0 = 0;
+      angle = 0;
+      vx = 0;
+      vy = 0;
+      x = 0;
+      y = 0;
+      maxHeight = 0;
+      flightTime = 0;
+      maxRange = 0;
+      launched = false;
+      maxHeightReached = false;
+      trajectoryPoints = [];
+
+      timeDisplay.textContent = '0.00';
+      velocityCurrentDisplay.textContent = '0.00';
+      distDisplay.textContent = '0.00';
+      maxHeightDisplay.textContent = '0.00';
+      maxHeightDisplay.parentElement.style.opacity = 0.4;
+
+      messageDisplay.textContent = '';
+      launchBtn.disabled = false;
+      resetBtn.disabled = true;
+
+      drawGrid();
+    }
+
+    // Handler de lançamento
+    function launchProjectile() {
+      if(launched) return;
+
+      const velocityValue = parseFloat(velocityInput.value);
+      const angleValue = parseFloat(angleInput.value);
+      const massValue = parseFloat(massInput.value);
+      const predictionValue = parseFloat(predictedLandingInput.value);
+
+      if(isNaN(velocityValue) || velocityValue <= 0){
+        alert('Por favor, insira uma velocidade inicial válida (maior que 0).');
+        return;
+      }
+      if(isNaN(angleValue) || angleValue <= 0 || angleValue >= 90){
+        alert('Por favor, insira um ângulo válido entre 1° e 89°.');
+        return;
+      }
+      if(isNaN(massValue) || massValue <= 0){
+        alert('Por favor, insira uma massa válida (maior que 0).');
+        return;
+      }
+      if(isNaN(predictionValue)){
+        alert('Por favor, insira uma previsão válida da distância de aterrissagem.');
+        return;
+      }
+
+      currentObject.mass = massValue;
+
+      v0 = velocityValue;
+      angle = angleValue * (Math.PI / 180);
+      vx = v0 * Math.cos(angle);
+      vy = v0 * Math.sin(angle);
+
+      maxHeight = (vy * vy) / (2 * g);
+      flightTime = (2 * vy) / g;
+      maxRange = vx * flightTime;
+
+      t = 0;
+      launched = true;
+      maxHeightReached = false;
+      trajectoryPoints = [];
+
+      launchBtn.disabled = true;
+      resetBtn.disabled = true;
+      messageDisplay.textContent = '';
+      maxHeightDisplay.parentElement.style.opacity = 0.4;
+
+      drawGrid();
+      animate();
+    }
+
+    // Iniciar
+    updateMassInputFromObject();
+    drawGrid();
+    maxHeightDisplay.parentElement.style.opacity = 0.4;
+    resetBtn.disabled = true;
+
+    launchBtn.addEventListener('click', launchProjectile);
+    resetBtn.addEventListener('click', () => {
+      resetSimulation();
+      resetBtn.disabled = true;
+    });
+
+    function updateMassInputFromObject() {
+      massInput.value = currentObject.mass;
+      massInput.disabled = (currentObject.name === 'Flecha');
+    }
+
+    objectSelect.addEventListener('change', () => {
+      const objKey = objectSelect.value;
+      currentObject = objects[objKey];
+      updateMassInputFromObject();
+      messageDisplay.textContent = '';
+      resetSimulation();
+    });
+
+    massInput.addEventListener('input', () => {
+      let val = parseFloat(massInput.value);
+      if (isNaN(val) || val <= 0) {
+        massInput.value = currentObject.mass;
+      } else {
+        currentObject.mass = val;
+      }
+    });
+  })();
+</script>
+</body>
+</html>
